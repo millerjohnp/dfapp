@@ -1,0 +1,7 @@
+click
+matplotlib
+pandas
+python-dotenv
+spacy
+streamlit
+tqdm
