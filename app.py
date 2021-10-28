@@ -3,11 +3,12 @@ import json
 import os
 
 import matplotlib.pylab as plt
+import pandas as pd
 import streamlit as st
 
 import utils
 
-DATADIR = "."
+DATADIR = "/home/john/digitalforensics/data"
 
 st.set_page_config(
     page_title="Digital forensics",
@@ -22,6 +23,11 @@ def load_metadata():
 def load_mentions():
     with open(os.path.join(DATADIR, "mentions.json")) as handle:
         return json.load(handle)
+
+@st.cache
+def load_named_ents():
+    return utils.get_entity_recognition_counts(
+        os.path.join(DATADIR, "named_entities.json"))
 
 def get_tool_mentions(caselink):
     mention_map = load_mentions()
@@ -47,14 +53,25 @@ df_tool = df_tool.sort_values("year", ascending=False)
 st.write("#### Number of cases per year")
 fig, ax = plt.subplots(figsize=(5, 1.5))
 df_tool.year.value_counts().sort_index().plot(ax=ax)
-ax.set_xlabel("Year")
-ax.set_ylabel("Number of cases")
+ax.set_xlabel("Number of cases")
+ax.set_ylabel("Year")
 st.pyplot(fig)
 
 st.write("#### Most common courts")
 num_appearances = df_tool.court.value_counts().nlargest(10)
 num_appearances.name = "Number of cases"
 st.write(num_appearances)
+
+people, organizations = load_named_ents()
+st.write("#### Most common people")
+common_people = pd.DataFrame(people[toolname].most_common(15))
+common_people.name = "Number of cases"
+st.write(common_people)
+
+st.write("#### Most common organizations")
+common_orgs = pd.DataFrame(organizations[toolname].most_common(15))
+common_orgs.name = "Number of cases"
+st.write(common_orgs)
 
 st.write("### Tool mentions")
 case_num = st.select_slider(
