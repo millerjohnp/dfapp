@@ -1,4 +1,5 @@
 """Utilities for data visualization."""
+from collections import defaultdict, Counter
 import json
 
 import pandas as pd
@@ -38,3 +39,24 @@ def load_metadata_df(path):
     df = df[df.year >= 2006]
 
     return df
+
+def get_entity_recognition_counts(path):
+    """Get lists of recognized named entities by tool"""
+    with open(path) as handle:
+        all_ents = json.load(handle)
+    
+    people = defaultdict(list)
+    orgs = defaultdict(list)
+    for case in all_ents.values():
+        tool = case["tool"]
+        if "ORG" in case["entities"]:
+            orgs[tool].extend(case["entities"]["ORG"])
+        if "PERSON" in case["entities"]:
+            people[tool].extend(case["entities"]["PERSON"])
+
+    for tool, entities in people.items():
+        people[tool] = Counter(entities)
+    for tool, entities in orgs.items():
+        orgs[tool] = Counter(entities)
+
+    return people, orgs
