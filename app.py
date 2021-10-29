@@ -8,7 +8,7 @@ import streamlit as st
 
 import utils
 
-DATADIR = "/home/john/digitalforensics/data"
+DATADIR = "."
 
 st.set_page_config(
     page_title="Digital forensics",
